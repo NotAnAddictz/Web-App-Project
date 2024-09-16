@@ -1,0 +1,9 @@
+21:58:48,733 root INFO Removed All Teams
+22:03:11,932 root INFO Add Teams: Team1 16/12 1
+22:04:11,653 root INFO Removed All Matches
+22:04:45,674 root INFO Add Teams: team2 15/12 2
+22:05:12,573 root INFO Removed All Matches
+22:05:17,85 root INFO Added Matches: Team1 team2 1 2
+22:05:33,219 root INFO Added Matches: team2 Team1 12 1
+22:06:03,223 root INFO Edited Matches
+22:06:05,46 root INFO Removed All Matches

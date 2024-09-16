@@ -1,9 +1,20 @@
 import streamlit as st
 import pandas as pd
 import functions
-# Sanity chekc for presence of Data Files
+import logging
+
+TEAMLIST = 'teams.xlsx'
+LOGFILE = "logs.txt"
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+file_handler = logging.FileHandler(LOGFILE)  
+logger.addHandler(file_handler) 
+
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
 try: 
-    teams = pd.read_excel("teams.xlsx",header=0)
+    teams = pd.read_excel(TEAMLIST,header=0)
 except:
     teams = pd.DataFrame({'Position':pd.Series(dtype='int'),
                           'TeamName':pd.Series(dtype='str'),
@@ -15,11 +26,11 @@ except:
                           'Draw':pd.Series(dtype='int'),
                           'Loss':pd.Series(dtype='int'),
                           })
-    teams.to_excel("teams.xlsx",index=False)
+    teams.to_excel(TEAMLIST,index=False)
 
 teams = teams.fillna(int(0))
 st.title("We are the Champions")
-print(teams)
+
 # Table Display
 teamsToDisplay = teams.filter(items=['Position','TeamName','GroupNo','Score','Wins','Draw','Loss']).set_index('Position')
 st.header("League Table")
@@ -29,11 +40,22 @@ st.dataframe(styled_df,width=1000)
 
 # Add Teams text_area and button
 newTeams= st.text_area(label = "Add Teams",placeholder="TeamName, Date of Registration, Group Number")
-submitted = st.button("Add Teams")
+col1,col2 = st.columns([1,1])
+with col1:
+    submitted = st.button("Add Teams")
 if submitted:
     index,teams = functions.addTeams(newTeams,teams)
     if index == -1:
         teams.to_excel("teams.xlsx",index=False)
+        logging.info(f"Add Teams: {newTeams.replace("\n",",")}")
         st.rerun()
     else:
         st.toast(f"Error in line {index}: {teams}")
+
+# Clearing all teams
+with col2:
+    removeAll = st.button("Clear All")
+if removeAll:
+    functions.remove(TEAMLIST)
+    logging.info("Removed All Teams")
+    st.rerun()
