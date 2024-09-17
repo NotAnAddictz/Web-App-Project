@@ -20,7 +20,7 @@ st.session_state['Button'] = False
 try:
     teams = pd.read_excel(TEAMLIST,header = 0)
 except:
-    pass
+    teams = None
 try: 
     matches = pd.read_excel(MATCHLIST,header = 0)
     

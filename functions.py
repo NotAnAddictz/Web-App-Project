@@ -50,25 +50,23 @@ def verifyTable(matches: pd.DataFrame,teams:pd.DataFrame)->bool|str:
         except Exception as e:
             return e
     return True
+
 #=======================================================================================================
 
 def addTeams(teamsToAdd: str, teams: pd.DataFrame)-> tuple[int,pd.DataFrame] | tuple[int,str]:
     teamList = teamsToAdd.split('\n')
-    tempList= []
     index = 0
+    newTeams = teams
     for index,team in enumerate(teamList):
-        verified = verifyTeams(team,teams)
+        verified = verifyTeams(team,newTeams)
         if verified == True:
             teamStats = team.strip().split(" ")
             index +=1
-            team = pd.Series([len(teams)+index,teamStats[0],teamStats[1],int(teamStats[2])],index=['Position','TeamName','RegistrationDate','GroupNo'])
-            tempList.append(team)
+            newSeries = pd.Series({"Position":len(teams),"TeamName":teamStats[0],"RegistrationDate":teamStats[1],"GroupNo":int(teamStats[2])})
+            newTeams = pd.concat([newTeams,newSeries.to_frame().T],ignore_index=True)
         else:
             return (index,verified)
-    if len(tempList) > 0:
-        newDF = pd.DataFrame(tempList)
-        teams = pd.concat([teams,newDF],ignore_index=True)
-    return (-1,teams)
+    return (-1,newTeams)
 
 
 def addResults(scores: str,matches: pd.DataFrame,teams: pd.DataFrame)-> pd.DataFrame:
@@ -88,27 +86,47 @@ def addResults(scores: str,matches: pd.DataFrame,teams: pd.DataFrame)-> pd.DataF
         matches = pd.concat([matches,newDF],ignore_index=True)
     return (-1,matches)
 
-#================================================================================================================
-
-# Helper Methods
-
-def getResult(row)->str:
-    if row['Team 1 Goal'] == row['Team 2 Goal']:
-        return "Draw"
-    elif row['Team 1 Goal'] > row['Team 2 Goal']:
-        return row["Team 1"]
-    else:
-        return row['Team 2']
-    
 # Iterate through every match and update the scores accordingly
 def updateScores(matches: pd.DataFrame, teams: pd.DataFrame)->pd.DataFrame:
     if len(matches) == 0:
         return teams
     else:
-        teamList = dict(pd.unique(matches['Team 1','Team 2'].values()))
-        print(teamList)
-        for x in range(len(matches)): 
-            pass
+        colToUpdate = ['GamesPlayed','Goals','Wins','Draw','Loss','Score']
+        for index,team in enumerate(teams['TeamName']):
+            relevantRows = matches.loc[(matches['Team 1'] == team) | (matches['Team 2'] == team)]
+            # GamesPlayed, Goals, Win, Draw, Losses, Score
+            teamStats = [0,0,0,0,0,0]
+            print(relevantRows)
+            for row in relevantRows.index.tolist():
+                teamStats[0]+=1
+                teamStats[1]+=int(relevantRows.at[row,'Team 1 Goal'] if relevantRows.at[row,'Team 1'] == team else relevantRows.at[row,'Team 2 Goal'])
+                if relevantRows.at[row,'Result'] == team:
+                    teamStats[2]+=1
+                elif relevantRows.at[row,'Result'] == 'Draw':
+                    teamStats[3] +=1
+                else:
+                    teamStats[4] += 1
+                teamStats[5] = teamStats[2]*3 + teamStats[3]
+            teams.loc[index,colToUpdate] = pd.Series(teamStats,index=colToUpdate)
+    return teams
+
+def sortTeams(teams: pd.DataFrame)-> pd.DataFrame:
+    teams['RegistrationDate'] = pd.to_datetime(teams['RegistrationDate'], format='%d/%m')
+    teams['RegistrationDate'] = teams['RegistrationDate'].dt.date
+    teams = teams.sort_values(by=["Score",'Goals','RegistrationDate'],ascending=[False,False,True])
+    return teams
+#================================================================================================================
+
+# Helper Methods
+
+def getResult(row)->str:
+    if int(row['Team 1 Goal']) == int(row['Team 2 Goal']):
+        return "Draw"
+    elif int(row['Team 1 Goal']) > int(row['Team 2 Goal']):
+        return row["Team 1"]
+    else:
+        return row['Team 2']
+    
             
 def remove(filePath: str)->bool | str:
     try:
