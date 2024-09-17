@@ -6,12 +6,11 @@ import logging
 TEAMLIST = 'teams.xlsx'
 LOGFILE = "logs.txt"
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
-
-file_handler = logging.FileHandler(LOGFILE)  
-logger.addHandler(file_handler) 
-
-file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+if not logger.hasHandlers():
+    logging.basicConfig(level=logging.INFO)
+    file_handler = logging.FileHandler(LOGFILE)
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))  
+    logger.addHandler(file_handler) 
 
 try: 
     teams = pd.read_excel(TEAMLIST,header=0)
@@ -47,7 +46,7 @@ if submitted:
     index,teams = functions.addTeams(newTeams,teams)
     if index == -1:
         teams.to_excel("teams.xlsx",index=False)
-        logging.info(f"Add Teams: {newTeams.replace("\n",",")}")
+        logger.info(f"Add Teams: {newTeams.replace("\n",",")}")
         st.rerun()
     else:
         st.toast(f"Error in line {index}: {teams}")
@@ -57,5 +56,5 @@ with col2:
     removeAll = st.button("Clear All")
 if removeAll:
     functions.remove(TEAMLIST)
-    logging.info("Removed All Teams")
+    logger.info("Removed All Teams")
     st.rerun()

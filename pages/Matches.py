@@ -9,10 +9,12 @@ LOGFILE = "logs.txt"
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-file_handler = logging.FileHandler(LOGFILE)  
-logger.addHandler(file_handler) 
+if not logger.hasHandlers():
+    logging.basicConfig(level=logging.INFO)
+    file_handler = logging.FileHandler(LOGFILE)  
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(file_handler) 
 
-file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 st.title("Matches")
 st.session_state['Button'] = False
 try:
@@ -40,7 +42,7 @@ with st.form("Matches"):
         if verified == True:
             editedDF['Result'] = editedDF.apply(functions.getResult,axis=1)
             editedDF.to_excel(MATCHLIST,index=False)
-            logging.info("Edited Matches")
+            logger.info("Edited Matches")
             st.rerun()
         else:
              st.toast(f"Error: {verified}")
@@ -56,7 +58,7 @@ if submitted:
     if index == -1:
         matches['Result'] = matches.apply(functions.getResult,axis=1)
         matches.to_excel(MATCHLIST,index=False)
-        logging.info(f"Added Matches: {newScore}")
+        logger.info(f"Added Matches: {newScore}")
         st.rerun()
     else:
         st.toast(f"Error in line {index}: {matches}")
@@ -66,5 +68,5 @@ with col2:
 # Clearing all matches
 if removeAll:
     functions.remove(MATCHLIST)
-    logging.info("Removed All Matches")
+    logger.info("Removed All Matches")
     st.rerun()
