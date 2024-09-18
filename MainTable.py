@@ -4,7 +4,6 @@ import functions
 import logging
 
 TEAMLIST = 'teams.xlsx'
-MATCHLIST = 'scoreList.xlsx'
 LOGFILE = "logs.txt"
 logger = logging.getLogger(__name__)
 if not logger.hasHandlers():
@@ -13,58 +12,78 @@ if not logger.hasHandlers():
     file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))  
     logger.addHandler(file_handler) 
 
-try:
-    matches = pd.read_excel(MATCHLIST,header = 0)
-except:
-    matches = None
-try: 
-    teams = pd.read_excel(TEAMLIST,header=0)
-except:
-    teams = pd.DataFrame({'Position':pd.Series(dtype='int'),
-                          'TeamName':pd.Series(dtype='str'),
-                          'RegistrationDate':pd.Series(dtype='str'),
-                          'GroupNo':pd.Series(dtype='int'),
-                          'Score':pd.Series(dtype='int'),
-                          'GamesPlayed':pd.Series(dtype='int'),
-                          'Goals':pd.Series(dtype='int'),
-                          'Wins':pd.Series(dtype='int'),
-                          'Draw':pd.Series(dtype='int'),
-                          'Loss':pd.Series(dtype='int'),
-                          })
-    teams.to_excel(TEAMLIST,index=False)
+if 'teams' not in st.session_state or 'matches' not in st.session_state:
+    teams,matches = functions.readFiles()
+    st.session_state['teams'] = teams
+    st.session_state['matches'] = matches
 
-teams = teams.fillna(int(0))
-st.title("We are the Champions")
+matches = st.session_state['matches']
+teams = st.session_state['teams']
+teams = teams.fillna(0)
+st.set_page_config(page_title="We are the Champions", page_icon=None, layout="wide")
+st.markdown("<h1 style='text-align: center; color: black;'>We are the Champions</h1>", unsafe_allow_html=True)
 
-# Updating Scores
-teams = functions.sortTeams(functions.updateScores(matches,teams)).reset_index(drop=True)
-teams['Position'] = teams.index + 1
+updatedTeams = []
+if len(teams) != 0:
+ 
+    groupList = teams['GroupNo'].unique()
+    for x in groupList:
+        group = teams[teams['GroupNo'] == x].reset_index(drop=True)
+        group = functions.parseTeams(group)
+        updatedTeams.append(group)
 
-# Table Display
-teamsToDisplay = teams.filter(items=['Position','TeamName','GroupNo','Score','Wins','Draw','Loss','Goals']).set_index('Position')
-st.header("League Table")
+if len(updatedTeams) == 2:
+    col1,col2 = st.columns([3,3],gap='medium')
+    with col1:
+        st.header(f'Group {groupList[0]}')
+        st.table(updatedTeams[0])
 
-styled_df = teamsToDisplay.style.apply(lambda x: ['background-color: green'] * len(x) if x.name <= 4 else ['background-color: red'] * len(x), axis=1).format(precision=0)
-st.table(styled_df)
+    with col2:
+        st.header(f'Group {groupList[1]}')
+        st.table(updatedTeams[1])
+elif len(updatedTeams) == 1:
+    st.header(f'Group {groupList[0]}')
+    st.table(updatedTeams[0])
+else:
+    st.header("No Teams Registered")
 
 # Add Teams text_area and button
-newTeams= st.text_area(label = "Add Teams",placeholder="TeamName, Date of Registration, Group Number")
-col1,col2 = st.columns([1,1])
+col1,col2 = st.columns(2)
 with col1:
-    submitted = st.button("Add Teams")
-if submitted:
+    newTeams= st.text_area(label = "Add Teams",placeholder="TeamName, Date of Registration, Group Number")
+    addTeams = st.button("Add Teams")
+if addTeams:
     index,teams = functions.addTeams(newTeams,teams)
     if index == -1:
-        teams.to_excel("teams.xlsx",index=False)
+        teams = teams.fillna(0)
+        st.session_state['teams'] = teams
+        functions.save('teams',teams)
         logger.info(f"Add Teams: {newTeams.replace("\n",",")}")
         st.rerun()
     else:
         st.toast(f"Error in line {index}: {teams}")
 
-# Clearing all teams
 with col2:
+    lessTeams = st.text_area(label = "Remove Teams",placeholder="TeamName")
+    removeTeams= st.button("Remove Teams")
     removeAll = st.button("Clear All")
+
+if removeTeams:
+    lessTeams,matches = functions.removeTeams(lessTeams.strip(),teams,matches)
+    if type(lessTeams) == pd.DataFrame:
+        teams = lessTeams
+        st.session_state['teams'] = teams
+        st.session_state['matches'] = matches
+        functions.save('teams',teams)
+        functions.save('matches',matches)
+        st.rerun()
+    else:
+        st.toast(lessTeams)
+
 if removeAll:
-    functions.remove(TEAMLIST)
-    logger.info("Removed All Teams")
+    functions.remove('teams')
+    functions.remove('matches')
+    del st.session_state['matches']
+    del st.session_state['teams']
+    logger.info("Removed All Teams and Matches")
     st.rerun()

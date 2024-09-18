@@ -39,9 +39,12 @@ Format of the input is as follows:
 ### Logs
 The Logs page tracks all user input and button clicks, as well as the Date Time 
 
+### Search
+The Search page enables the user to select an existing team and find all information and relevant matches to it.
+
 ## Features
 ### Data Type Verification
-The app includes assertions and regex when parsing user input in order to verify the format of the data. If the format is invalid, the data will not be added in.
+The app includes assertions and regex when parsing user input in order to verify the format of the data. If the format is invalid, the data will not be added in. Additional verification measures has been added, such as number of teams in a group, as well as preventing cross-team matches
 
 ### Auto Update
 Due to streamlit's features, the Web Page will be refreshed after every user input. Thus, the displayed tables will be updated automatically.
@@ -51,8 +54,8 @@ Using streamlit's ```data_editor```, we are able to allow dynamic updating of th
 
 ## Assumptions
 Due to the flexible instructions given, there are a few assumptions that I have made regarding the logic of the project.
-### 1. Deleting teams != deleting matches involved
-### 2. Group Numbers are unique
+### 1. Deleting teams == deleting matches involved
+### 2. Only 2 groups are available at one time
 ### 3. Registration Date must be in format %dd/%mm
 
 ## Contact:
