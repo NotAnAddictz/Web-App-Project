@@ -1,7 +1,5 @@
 from typing import List
-import json
 import pandas as pd
-import numpy as np
 import re
 import os
 
@@ -96,7 +94,6 @@ def updateScores(matches: pd.DataFrame, teams: pd.DataFrame)->pd.DataFrame:
             relevantRows = matches.loc[(matches['Team 1'] == team) | (matches['Team 2'] == team)]
             # GamesPlayed, Goals, Win, Draw, Losses, Score
             teamStats = [0,0,0,0,0,0]
-            print(relevantRows)
             for row in relevantRows.index.tolist():
                 teamStats[0]+=1
                 teamStats[1]+=int(relevantRows.at[row,'Team 1 Goal'] if relevantRows.at[row,'Team 1'] == team else relevantRows.at[row,'Team 2 Goal'])
