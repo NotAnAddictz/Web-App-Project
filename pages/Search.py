@@ -29,11 +29,11 @@ with st.form("Search"):
     submitted = st.form_submit_button('Search')
     if submitted:
         st.header("Team Information")
-        team = teams[teams['TeamName']== teamName]
+        team = teams[teams['TeamName']== teamName].reset_index(drop=True)
         team = team.drop(columns = 'Position')
         st.table(team.style.format(precision=0))
         st.header("Matches")
-        match = pd.concat([matches[matches['Team 1']== teamName],matches[matches['Team 2']== teamName]])
+        match = pd.concat([matches[matches['Team 1']== teamName],matches[matches['Team 2']== teamName]]).reset_index(drop=True)
         if match.empty:
             st.write("No matches found")
         else:

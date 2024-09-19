@@ -20,6 +20,7 @@ if 'teams' not in st.session_state or 'matches' not in st.session_state:
 matches = st.session_state['matches']
 teams = st.session_state['teams']
 teams = teams.fillna(0)
+
 st.set_page_config(page_title="We are the Champions", page_icon=None, layout="wide")
 st.markdown("<h1 style='text-align: center; color: black;'>We are the Champions</h1>", unsafe_allow_html=True)
 

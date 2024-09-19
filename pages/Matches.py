@@ -32,16 +32,16 @@ with st.form("Matches"):
                               width=2000,
                               hide_index=True,key="matchform")
     submitted = st.form_submit_button("Update")
-    if submitted:
+    if submitted and not editedDF.empty:
         editedDF['Result'] = editedDF.apply(functions.getResult,axis=1)
         rowsToDelete = functions.callback(editedDF)
         editedDF = editedDF.drop(columns=['Delete?'])
         if len(rowsToDelete) >0:
             matches = editedDF.drop(rowsToDelete).reset_index(drop=True)
+        else:
+            matches = editedDF
         verified = functions.verifyTable(editedDF,teams)
         if verified == True:
-            if len(rowsToDelete) >0:
-                matches = editedDF.drop(rowsToDelete).reset_index(drop=True)
             if matches.empty:
                 del st.session_state['matches']
                 functions.remove('matches')
