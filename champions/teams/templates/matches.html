@@ -13,13 +13,19 @@
             event.preventDefault(); 
             const button = event.submitter || event.target;
             const action = button.value;
-
-            const textarea = button.closest('form').querySelector('textarea');
-            const data = textarea.value;
+            data = ""
+            if (action == 'add'){
+                data = button.closest('form').querySelector('textarea').value;
+            }else if (action =='remove'){
+                const checkedBoxes = document.querySelectorAll('.messageCheckbox:checked')
+                data = Array.from(checkedBoxes).map(checkbox => checkbox.value);
+            }else if (action == 'update'){
+                data = document.getElementById('matchTable')
+            }
         fetch('{% url 'match' %}', {
             method: 'POST',
             headers: {
-              'Content-Type': 'text/plain',
+              'Content-Type': 'application/json',
               'X-CSRFToken':'{{csrf_token}}'
             },
             body: JSON.stringify({action: action,data:data})
@@ -47,47 +53,50 @@
         <a href={% url 'logs' %}>Logs</a>
       </div>
       <div class='caption' align="center">Match List</div>
-      <table class='table' align="center">
-        
+      <table class='table' align="center", id='matchTable'>
         <thead>
-
         <tr>
             <th>Team A</th>
             <th>Team B</th>
             <th>Team A Goals</th>
             <th>Team B Goals</th>
             <th>Result</th>
+            <th>X<th>
         </tr>
     </thead>
     {% for index in match %}
         <tbody>
-            <td contenteditable=True>{{ index.team1.name }}</td>
-            <td contenteditable=True>{{ index.team2.name }}</td>
-            <td contenteditable=True>{{ index.score1 }}</td>
-            <td contenteditable=True>{{ index.score2 }}</td>
+            <td >{{ index.team1.name }}</td>
+            <td >{{ index.team2.name }}</td>
+            <td >{{ index.score1 }}</td>
+            <td >{{ index.score2 }}</td>
             {% if index.winner != None%}
-            <td>index.winner.name</td>
+            <td>{{index.winner.name}}</td>
             {% else %}
             <td>Draw</td>
             {% endif %}
+            <td>
+            <input type="checkbox" class="messageCheckbox" value={{index.id}}/>
+            </td>
         </tbody>
     {% endfor %}
     </table>
     <div align=center>
-        <button class='button' onclick="submitTable()">Update Matches</button>
+        <button class='button' onclick="handleSubmit(event)" value='update'>Update Matches</button>
+        <button class = 'button' onclick = "handleSubmit(event)" value='remove'>Remove Selected</button> 
     </div>
     <div class="form-container">
         <form onsubmit="handleSubmit(event)">
             {% csrf_token %}
             <label for="text">Add Matches</label>
             <div class="grow-wrap">
-                <textarea name="text" id="matches" onInput="this.parentNode.dataset.replicatedValue = this.value"></textarea>
+                <textarea name="text" id="matches" onInput="this.parentNode.dataset.replicatedValue = this.value" placeholder="<team1><team2><score1><score2>"></textarea>
             </div>
             <button class='button'value='add'
             type="submit">Add Matches
         </button>
         <button  class='middleButton' style="height:30px" value='clear'
-        type="submit" onclick="removeAll(event)">Clear All
+        type="submit" onclick="handleSubmit(event)">Clear All
     </button>
         </form>
         

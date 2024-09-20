@@ -32,11 +32,31 @@ class Match(models.Model):
             return self.team1
         elif self.score2 > self.score1:
             return self.team2
-        return "Draw"
+        return None
 
     def save(self, *args, **kwargs):
-        self.winner = self.calculate_winner()
+        if self.pk: 
+            old_match = Match.objects.get(pk=self.pk)
+            self.update_team_goals(subtract=True, old_match=old_match)
+        else:
+            self.update_team_goals() 
+        
+        self.winner = self.calculate_winner() 
         super().save(*args, **kwargs)
+
+    def update_team_goals(self, subtract=False, old_match=None):
+        if subtract and old_match:
+            print(old_match)
+            self.team1.goals -= old_match.score1
+            self.team2.goals -= old_match.score2
+
+        # Add the current match's goals
+        self.team1.goals += int(self.score1)
+        self.team2.goals += int(self.score2)
+
+        # Save the updated goal counts
+        self.team1.save()
+        self.team2.save()
 
 class Logs(models.Model):
     string = models.TextField()

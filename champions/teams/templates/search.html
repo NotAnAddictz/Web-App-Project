@@ -11,10 +11,29 @@
     <script>
         function handleSubmit(event) {
             event.preventDefault(); 
-            team = document.getElementById('name').value
-            console.log('Username:',team);
-            location.reload();
-        }
+            const data = document.getElementById('name').value
+        fetch('{% url 'search' %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken':'{{csrf_token}}'
+            },
+            body: JSON.stringify(data)
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log('Response from server:', data);
+            if (data.status != 'success') {
+                console.error('Server returned an error:', data.Error);
+            }else{
+                teamData= JSON.parse(data.team);
+                matchData = JSON.parse(data.match)
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+      });
+  }
     </script>
 </head>
 <body>
@@ -27,7 +46,7 @@
       <h1 align="center">
         Search Teams
       </h1>
-    
+      
       <form onsubmit="handleSubmit(event)">
         {% csrf_token %}
         <label for="text">Add Matches</label>
@@ -38,6 +57,65 @@
         type="submit">Search
     </button>
     </form>
-    </input>
+    
+    {% if teamData.length > 0 %}
+    <table id='table1'align="center">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Score</th>
+            <th>Wins</th>
+            <th>Loss</th>
+            <th>Draw</th>
+            <th>Goals</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+            <td>{{ team.name }}</td>
+            <td>{{ team.score }}</td>
+            <td>{{ team.wins }}</td>
+            <td>{{ team.loss }}</td>
+            <td>{{ team.draw }}</td>
+            <td>{{ team.goals }}</td>
+            </tr>
+        </tbody>
+    </table>
+    {% else %}
+    <h3 align='center'> No data has been found for this team </h3>
+    {% endif %}
+    {% if matchData.length %}
+    <table class='table' align="center", id='matchTable'>
+        <thead>
+        <tr>
+            <th>Team A</th>
+            <th>Team B</th>
+            <th>Team A Goals</th>
+            <th>Team B Goals</th>
+            <th>Result</th>
+            <th>X<th>
+        </tr>
+    </thead>
+    {% for index in match %}
+        <tbody>
+            <td >{{ index.team1.name }}</td>
+            <td >{{ index.team2.name }}</td>
+            <td >{{ index.score1 }}</td>
+            <td >{{ index.score2 }}</td>
+            {% if index.winner != None%}
+            <td>{{index.winner.name}}</td>
+            {% else %}
+            <td>Draw</td>
+            {% endif %}
+            <td>
+            <input type="checkbox" class="messageCheckbox" value={{index.id}}/>
+            </td>
+        </tbody>
+    {% endfor %}
+    {% else %}
+    <h3 align='center'> No matches has been found for this team </h3>
+    {% endif %}
+    
+    </table>
     </body>
     </html>

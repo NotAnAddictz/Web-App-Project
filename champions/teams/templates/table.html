@@ -13,13 +13,15 @@
             event.preventDefault(); 
             const button = event.submitter || event.target;
             const action = button.value;
-
-            const textarea = button.closest('form').querySelector('textarea');
-            const data = textarea.value;
+            data = " "
+            if (action != 'clear'){
+                const textarea = button.closest('form').querySelector('textarea');
+                data = textarea.value;
+            }
         fetch('{% url 'table' %}', {
             method: 'POST',
             headers: {
-              'Content-Type': 'text/plain',
+              'Content-Type': 'application/json',
               'X-CSRFToken':'{{csrf_token}}'
             },
             body: JSON.stringify({action: action,data:data})
@@ -113,7 +115,7 @@
             {% csrf_token %}
             <label for="text">Add Teams</label>
             <div class="grow-wrap">
-                <textarea name="text" id="addTeamsText" onInput="this.parentNode.dataset.replicatedValue = this.value"></textarea>
+                <textarea name="text" id="addTeamsText" onInput="this.parentNode.dataset.replicatedValue = this.value" placeholder='<teamName><regDate(%d/%m)><groupNumber>'></textarea>
             </div>
             <button class='button' value='add'
             type="submit">Add Teams
@@ -123,7 +125,7 @@
             {% csrf_token %}
             <label for="text">Remove Teams</label>
             <div class="grow-wrap">
-                <textarea name="text" id="removeTeamsText" onInput="this.parentNode.dataset.replicatedValue = this.value"></textarea>
+                <textarea name="text" id="removeTeamsText" onInput="this.parentNode.dataset.replicatedValue = this.value" placeholder="<teamName>" ></textarea>
             </div>
             <button  class='button' value='remove'
             type="submit">Remove Teams
@@ -134,7 +136,6 @@
             <button class="middleButton" value="clear" type="submit" onclick="handleSubmit(event)">
                 Clear All
             </button>
-    
 </div>
 </body>
 </html>
