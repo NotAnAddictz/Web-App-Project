@@ -25,6 +25,7 @@
   
   form {
     text-align: center;
+    align-self: center;  
   }
   .table {
     align-self: center; 
@@ -40,6 +41,7 @@
 .grow-wrap {
   /* easy way to plop the elements on top of each other and have them both sized based on the tallest one's height */
   display: grid;
+  align-self: center;
 }
 .grow-wrap::after {
   /* Note the weird space! Needed to preventy jumpy behavior */
@@ -83,6 +85,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    margin-top: 10px;
 }
 .caption {
   caption-side: top;
@@ -119,3 +122,16 @@
   background-color: #555;
   color: white;
 }
+.button{
+  margin-top: 10px;
+}
+
+.middleButton{
+  text-align:center;
+  align-self: center;
+  width:100px;
+  height:60px;
+  color:white;
+  background-color: #c51610;
+}
+

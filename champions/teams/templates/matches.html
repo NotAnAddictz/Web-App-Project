@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html>
 <head>
     <link rel="shortcut icon" href="#">
-    <title>My Django Website</title>
+    <title>Matches</title>
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% load static %}
@@ -10,13 +11,32 @@
     <script>
         function handleSubmit(event) {
             event.preventDefault(); 
+            const button = event.submitter || event.target;
+            const action = button.value;
 
-            const username = document.getElementById('username').value;
-
-            console.log('Username:', username);
-
-            location.reload();
-        }
+            const textarea = button.closest('form').querySelector('textarea');
+            const data = textarea.value;
+        fetch('{% url 'match' %}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'text/plain',
+              'X-CSRFToken':'{{csrf_token}}'
+            },
+            body: JSON.stringify({action: action,data:data})
+          })
+          .then(response => response.json())
+          .then(data => {
+              console.log('Response from server:', data);
+              if (data.status == 'success') {
+                  location.reload(); 
+              } else {
+                  console.error('Server returned an error:', data.Error);
+              }
+          })
+          .catch(error => {
+              console.error('Error:', error);
+        });
+    }
     </script>
 </head>
 <body>
@@ -37,15 +57,14 @@
             <th>Team A Goals</th>
             <th>Team B Goals</th>
             <th>Result</th>
-           
         </tr>
     </thead>
     {% for index in match %}
         <tbody>
-            <td>{{ index.team1.name }}</td>
-            <td>{{ index.team2.name }}</td>
-            <td>{{ index.score1 }}</td>
-            <td>{{ index.score2 }}</td>
+            <td contenteditable=True>{{ index.team1.name }}</td>
+            <td contenteditable=True>{{ index.team2.name }}</td>
+            <td contenteditable=True>{{ index.score1 }}</td>
+            <td contenteditable=True>{{ index.score2 }}</td>
             {% if index.winner != None%}
             <td>index.winner.name</td>
             {% else %}
@@ -54,5 +73,26 @@
         </tbody>
     {% endfor %}
     </table>
+    <div align=center>
+        <button class='button' onclick="submitTable()">Update Matches</button>
+    </div>
+    <div class="form-container">
+        <form onsubmit="handleSubmit(event)">
+            {% csrf_token %}
+            <label for="text">Add Matches</label>
+            <div class="grow-wrap">
+                <textarea name="text" id="matches" onInput="this.parentNode.dataset.replicatedValue = this.value"></textarea>
+            </div>
+            <button class='button'value='add'
+            type="submit">Add Matches
+        </button>
+        <button  class='middleButton' style="height:30px" value='clear'
+        type="submit" onclick="removeAll(event)">Clear All
+    </button>
+        </form>
+        
+        </form>
+
+    </div>
     </body>
     </html>

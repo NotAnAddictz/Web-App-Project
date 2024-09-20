@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html>
 <head>
     <link rel="shortcut icon" href="#">
-    <title>My Django Website</title>
+    <title>Search</title>
     {% load bootstrap5 %}
     {% bootstrap_css %}
     {% load static %}
@@ -10,11 +11,8 @@
     <script>
         function handleSubmit(event) {
             event.preventDefault(); 
-
-            const username = document.getElementById('username').value;
-
-            console.log('Username:', username);
-
+            team = document.getElementById('name').value
+            console.log('Username:',team);
             location.reload();
         }
     </script>
@@ -26,5 +24,20 @@
         <a class="active" href={% url 'search' %}>Search Team</a>
         <a href={% url 'logs' %}>Logs</a>
       </div>
+      <h1 align="center">
+        Search Teams
+      </h1>
+    
+      <form onsubmit="handleSubmit(event)">
+        {% csrf_token %}
+        <label for="text">Add Matches</label>
+        <div >
+            <input type='text' id='name'>
+        </div>
+        <button class='button'
+        type="submit">Search
+    </button>
+    </form>
+    </input>
     </body>
     </html>

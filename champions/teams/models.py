@@ -5,8 +5,8 @@ from django.db import models
 from django.db import models
 from django.db.models import Q
 class Teams(models.Model):
-    name = models.CharField(max_length=200)
-    regDate = models.DateField()
+    name = models.CharField(max_length=200,unique=True)
+    regDate = models.CharField(max_length=10)
     groupNo = models.IntegerField()
     score  = models.IntegerField(default=0)
     wins = models.IntegerField(default=0)
