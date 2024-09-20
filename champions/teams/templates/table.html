@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="shortcut icon" href="#">
+    <title>My Django Website</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    {% bootstrap_javascript %}
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault(); 
+
+            const username = document.getElementById('username').value;
+
+            console.log('Username:', username);
+
+            location.reload();
+        }
+    </script>
+</head>
+<body>
+    <div class="sidebar">
+        <a class="active" href={% url 'table' %}>Match Table</a>
+        <a href={% url 'match' %}>Match List</a>
+        <a href={% url 'search' %}>Search Team</a>
+        <a href={% url 'logs' %}>Logs</a>
+      </div>
+    <div style="display: flex; justify-content: center;">
+        <h1 style="margin-right: 20px; margin-top: 50px">We are the Champions</h1>
+        <img src="{% static 'images/crown.avif' %}" alt="Crown" width="200" height="150">
+    </div>
+    <div class="table-container">
+        <table id='table1'>
+            <caption class='caption'>Group {{teams.first.groupNo}}</caption>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Score</th>
+                <th>Wins</th>
+                <th>Loss</th>
+                <th>Draw</th>
+                <th>Goals</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for team in teams %}
+                <tr>
+                <td>{{ team.name }}</td>
+                <td>{{ team.score }}</td>
+                <td>{{ team.wins }}</td>
+                <td>{{ team.loss }}</td>
+                <td>{{ team.draw }}</td>
+                <td>{{ team.goals }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <table id='table1'>
+            <caption class='caption'>Group {{teams.first.groupNo}}</caption>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Score</th>
+                <th>Wins</th>
+                <th>Loss</th>
+                <th>Draw</th>
+                <th>Goals</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for team in teams %}
+                <tr>
+                <td>{{ team.name }}</td>
+                <td>{{ team.score }}</td>
+                <td>{{ team.wins }}</td>
+                <td>{{ team.loss }}</td>
+                <td>{{ team.draw }}</td>
+                <td>{{ team.goals }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>   
+
+    <div class="form-container">
+        <form onsubmit="handleSubmit(event)">
+            {% csrf_token %}
+            <label for="text">Add Teams</label>
+            <div class="grow-wrap">
+                <textarea name="text" id="text" onInput="this.parentNode.dataset.replicatedValue = this.value"></textarea>
+            </div>
+            <button class='button'
+            type="submit">Add Teams
+        </button>
+        </form>
+        <form onsubmit="handleSubmit(event)">
+            {% csrf_token %}
+            <label for="text">Remove Teams</label>
+            <div class="grow-wrap">
+                <textarea name="text" id="text" onInput="this.parentNode.dataset.replicatedValue = this.value"></textarea>
+            </div>
+            <button  class='button'
+            type="submit">Remove Teams
+        </button>
+        <button  class='button'
+        type="submit">Clear Teams
+    </button>
+        </form>
+
+    </div>
+    
+</body>
+</html>

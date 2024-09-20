@@ -1,0 +1,30 @@
+<html>
+<head>
+    <link rel="shortcut icon" href="#">
+    <title>My Django Website</title>
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    {% bootstrap_javascript %}
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault(); 
+
+            const username = document.getElementById('username').value;
+
+            console.log('Username:', username);
+
+            location.reload();
+        }
+    </script>
+</head>
+<body>
+    <div class="sidebar">
+        <a href={% url 'table' %}>Match Table</a>
+        <a href={% url 'match' %}>Match List</a>
+        <a href={% url 'search' %}>Search Team</a>
+        <a class="active" href={% url 'logs' %}>Logs</a>
+      </div>
+    </body>
+    </html>
